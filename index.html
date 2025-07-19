@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tienda de Mascotas - Reserva</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>🐾 Gat i Gos</h1>
+    <p>Tu tienda de confianza para el cuidado de tu mascota</p>
+  </header>
+
+  <section class="hero">
+    <h2>Reserva baño o corte para tu mascota en 1 clic</h2>
+    <button onclick="document.getElementById('reserva').scrollIntoView({behavior:'smooth'})">
+      Reservar ahora
+    </button>
+  </section>
+
+  <section class="servicios">
+    <h3>Servicios</h3>
+    <ul>
+      <li>Baño y secado</li>
+      <li>Corte de pelo</li>
+      <li>Corte de uñas</li>
+      <li>Comida y accesorios</li>
+    </ul>
+  </section>
+
+  <section class="formulario" id="reserva">
+    <h3>Reserva tu cita</h3>
+    <form id="reservaForm">
+      <input type="text" name="nombre" placeholder="Tu nombre" required />
+      <input type="text" name="telefono" placeholder="Teléfono" required />
+      <input type="text" name="nombreMascota" placeholder="Nombre de la mascota" required />
+      <select name="servicio" required>
+        <option value="">Selecciona servicio</option>
+        <option value="baño">Baño</option>
+        <option value="corte">Corte</option>
+        <option value="uñas">Corte de uñas</option>
+      </select>
+      <input type="datetime-local" name="fecha" required />
+      <button type="submit">Enviar reserva</button>
+    </form>
+    <p id="respuesta"></p>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>
