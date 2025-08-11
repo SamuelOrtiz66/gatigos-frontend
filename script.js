@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 document.getElementById('reservaForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -21,7 +20,7 @@ document.getElementById('reservaForm').addEventListener('submit', async (e) => {
     document.getElementById('respuesta').innerText = "Error al enviar la reserva.";
   }
 });
-=======
+
 document.getElementById('reservaForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -44,4 +43,4 @@ document.getElementById('reservaForm').addEventListener('submit', async (e) => {
     document.getElementById('respuesta').innerText = "Error al enviar la reserva.";
   }
 });
->>>>>>> 11f3fcf3207355f38b08f8b5bb49d9d169fc7417
+f3fcf3207355f38b08f8b5bb49d9d169fc7417
