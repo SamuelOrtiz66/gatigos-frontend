@@ -28,7 +28,7 @@ document.getElementById('reservaForm').addEventListener('submit', async (e) => {
   const data = Object.fromEntries(formData.entries());
 
   try {
-    const response = await fetch('http://localhost:3001/api/reserva', { // 🔁 usa la ruta completa con puerto
+    const response = await fetch('https://gatigos-backend.onrender.com/api/reserva', { // 🔁 usa la ruta completa con puerto
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
