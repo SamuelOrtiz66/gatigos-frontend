@@ -1,107 +1,529 @@
-<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tienda de Mascotas - Reserva</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gat i Gos · Reserva Grooming</title>
+  <meta name="description" content="Reserva baño, corte y cuidados para tu mascota en Gat i Gos. Animaciones 3D, modo oscuro, validación avanzada y micro-interacciones." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg: #0c0f14;
+      --surface: rgba(255,255,255,.08);
+      --card: rgba(255,255,255,.12);
+      --text: #eaf2ff;
+      --muted: #b7c4dd;
+      --accent: #7cf3c0;
+      --accent-2: #7bb9ff;
+      --danger: #ff7b95;
+      --ok: #9dff7c;
+      --ring: rgba(124, 243, 192, .45);
+      --shadow: 0 10px 30px rgba(0,0,0,.45);
+      --radius: 18px;
+    }
+    @media (prefers-color-scheme: light){
+      :root{ --bg:#f6f8ff; --surface:rgba(0,12,40,.04); --card:#ffffffd9; --text:#0d1b2a; --muted:#3d5a80; --accent:#0cc5a7; --accent-2:#3a86ff; --ring:rgba(58,134,255,.25); --shadow: 0 10px 30px rgba(31,38,135,.2);}  
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font:16px/1.6 Manrope, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, sans-serif;
+      color:var(--text); background:var(--bg); overflow-x:hidden;
+    }
+    /* ====== Background FX ====== */
+    .bg{
+      position:fixed; inset:0; z-index:-2; background: radial-gradient(1200px 800px at 20% 10%, rgba(124,243,192,.12), transparent 60%),
+                  radial-gradient(1000px 800px at 80% 0%, rgba(123,185,255,.10), transparent 60%),
+                  radial-gradient(1200px 900px at 50% 100%, rgba(255,123,149,.08), transparent 60%),
+                  linear-gradient(180deg, rgba(0,0,0,.3), transparent 25%);
+      filter:saturate(1.05);
+    }
+    canvas.paws{position:fixed; inset:0; z-index:-1; opacity:.35;}
+
+    header{
+      position:sticky; top:0; backdrop-filter: blur(12px) saturate(1.2);
+      background: linear-gradient(180deg, rgba(0,0,0,.35), transparent);
+      border-bottom:1px solid rgba(255,255,255,.06);
+      display:flex; align-items:center; justify-content:space-between; gap:16px;
+      padding:18px 24px; z-index:10;
+    }
+    .brand{display:flex; align-items:center; gap:12px; user-select:none}
+    .brand .logo{width:38px; height:38px; display:grid; place-items:center; border-radius:12px;
+      background: conic-gradient(from 180deg at 50% 50%, var(--accent), var(--accent-2), var(--accent));
+      box-shadow: var(--shadow);
+    }
+    .brand .logo svg{filter:drop-shadow(0 6px 12px rgba(0,0,0,.3))}
+    .brand h1{font-size:18px; letter-spacing:.6px; margin:0}
+
+    .controls{display:flex; gap:10px; align-items:center}
+    .btn{--pad:12px 16px; padding:var(--pad); border-radius:12px; border:1px solid rgba(255,255,255,.12);
+      background:var(--surface); color:var(--text); cursor:pointer; transition:.2s transform, .2s filter, .2s background;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn.accent{background:linear-gradient(120deg, rgba(124,243,192,.18), rgba(123,185,255,.18)); border-color:transparent;}
+
+    main{max-width:1100px; margin:40px auto; padding:0 20px}
+
+    /* ====== HERO ====== */
+    .hero{display:grid; grid-template-columns: 1.2fr .8fr; gap:30px; align-items:center; margin:20px 0 40px}
+    .hero-card{position:relative; perspective:1200px}
+    .card-3d{border-radius:24px; background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.12); box-shadow: var(--shadow); padding:26px; transform-style:preserve-3d; min-height:320px;
+      transition: transform .25s ease-out;
+    }
+    .shine{position:absolute; inset:0; border-radius:24px; background: radial-gradient(400px 200px at var(--mx,50%) var(--my,50%), rgba(255,255,255,.25), transparent 40%);
+      mix-blend-mode:soft-light; pointer-events:none}
+    .pets{position:absolute; right:-10px; bottom:-10px; width:280px; transform:translateZ(60px) rotate(-6deg); filter:drop-shadow(0 30px 35px rgba(0,0,0,.5));}
+    .hero h2{font-size:40px; line-height:1.1; margin:0 0 10px}
+    .hero p{color:var(--muted); margin:0 0 18px}
+    .cta{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
+
+    /* ====== SERVICES ====== */
+    .section-title{font-size:20px; opacity:.9; margin:40px 0 14px}
+    .grid{display:grid; gap:16px; grid-template-columns: repeat( auto-fit, minmax(230px, 1fr) );}
+    .service{
+      position:relative; border-radius:var(--radius); padding:18px; background:var(--card);
+      border:1px solid rgba(255,255,255,.1); box-shadow:var(--shadow);
+      overflow:hidden; transform:translateZ(0);
+    }
+    .service h3{margin:6px 0 6px; font-size:18px}
+    .service .price{font-weight:800}
+    .service small{color:var(--muted)}
+    .badge{position:absolute; top:12px; right:12px; font-size:12px; padding:6px 10px; border-radius:999px; background:linear-gradient(120deg, rgba(124,243,192,.3), rgba(123,185,255,.35)); border:1px solid rgba(255,255,255,.18)}
+    .service .illus{position:absolute; right:-10px; bottom:-14px; width:120px; opacity:.9; transform:rotate(-12deg); filter:drop-shadow(0 8px 12px rgba(0,0,0,.35))}
+    .service .actions{display:flex; gap:10px; margin-top:12px}
+
+    /* ====== FORM ====== */
+    .form-wrap{margin-top:24px; display:grid; grid-template-columns: 1.1fr .9fr; gap:24px}
+    form{background:var(--card); padding:18px; border-radius:var(--radius); border:1px solid rgba(255,255,255,.1); box-shadow:var(--shadow)}
+    .row{display:grid; gap:12px; grid-template-columns:1fr 1fr}
+    .row-3{grid-template-columns:1fr 1fr 1fr}
+    label{font-weight:600; font-size:14px}
+    input, select, textarea{
+      width:100%; padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.14);
+      background:var(--surface); color:var(--text); outline:none; transition:border .15s, box-shadow .15s;
+    }
+    textarea{min-height:90px; resize:vertical}
+    input:focus, select:focus, textarea:focus{border-color:transparent; box-shadow:0 0 0 4px var(--ring)}
+    .hint{font-size:12px; color:var(--muted)}
+    .total{display:flex; align-items:center; justify-content:space-between; background:linear-gradient(120deg, rgba(124,243,192,.14), rgba(123,185,255,.14)); padding:12px 14px; border-radius:14px; margin-top:10px; border:1px dashed rgba(255,255,255,.18)}
+    .total b{font-size:20px}
+    .kudos{display:flex; gap:12px; align-items:center; margin-top:12px}
+    .switch{display:inline-grid; grid-auto-flow:column; gap:8px; align-items:center}
+    .switch input{appearance:none; width:42px; height:26px; border-radius:999px; background:rgba(255,255,255,.2); position:relative; outline:none; border:none; box-shadow:inset 0 0 0 2px rgba(255,255,255,.2);}
+    .switch input:before{content:""; position:absolute; width:18px; height:18px; border-radius:50%; background:white; top:4px; left:4px; transition:.2s}
+    .switch input:checked{background:linear-gradient(90deg, var(--accent), var(--accent-2))}
+    .switch input:checked:before{left:20px}
+
+    /* ====== SUMMARY PANEL ====== */
+    .summary{background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02)); border:1px solid rgba(255,255,255,.1);
+      border-radius:var(--radius); padding:18px; position:sticky; top:86px; height:fit-content}
+    .summary h4{margin:6px 0 8px}
+    .summary .line{display:flex; justify-content:space-between; gap:10px; padding:8px 0; border-bottom:1px dashed rgba(255,255,255,.15)}
+    .summary .line:last-child{border:none}
+
+    /* ====== TOAST ====== */
+    .toast{position:fixed; right:16px; bottom:16px; background:var(--card); border:1px solid rgba(255,255,255,.12); padding:12px 14px; border-radius:14px; box-shadow:var(--shadow); display:none}
+    .toast.ok{border-color:rgba(157,255,124,.4)}
+    .toast.err{border-color:rgba(255,123,149,.4)}
+
+    /* ====== CONFETTI ====== */
+    .confetti{position:fixed; inset:0; pointer-events:none}
+
+    /* ====== FOOTER ====== */
+    footer{margin:50px auto 80px; max-width:1100px; padding:0 20px; color:var(--muted); display:flex; align-items:center; justify-content:space-between}
+
+    /* ====== RESPONSIVE ====== */
+    @media (max-width: 920px){
+      .hero{grid-template-columns:1fr}
+      .form-wrap{grid-template-columns:1fr}
+      .row, .row-3{grid-template-columns:1fr}
+      .pets{right:10px; bottom:-30px; opacity:.65}
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .card-3d, .btn, .service, .pets{transition:none}
+      .paws{display:none}
+    }
+  </style>
 </head>
 <body>
+  <div class="bg"></div>
+  <canvas class="paws" aria-hidden="true"></canvas>
+
   <header>
-    <h1>🐾 Gat i Gos</h1>
-    <p>Tu tienda de confianza para el cuidado de tu mascota</p>
+    <div class="brand" aria-label="Gat i Gos">
+      <div class="logo" aria-hidden="true">
+        <!-- Paw SVG -->
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M6.5 8.5c0 1.38-1.12 2.5-2.5 2.5S1.5 9.88 1.5 8.5 2.62 6 4 6s2.5 1.12 2.5 2.5Zm5-1C11.5 8.88 10.38 10 9 10S6.5 8.88 6.5 7.5 7.62 5 9 5s2.5 1.12 2.5 2.5Zm5 0C16.5 8.88 15.38 10 14 10s-2.5-1.12-2.5-2.5S12.62 5 14 5s2.5 1.12 2.5 2.5ZM22.5 8.5c0 1.38-1.12 2.5-2.5 2.5S17.5 9.88 17.5 8.5 18.62 6 20 6s2.5 1.12 2.5 2.5ZM12 12c3.37 0 7 2.24 7 5 0 2.76-3.63 3-7 3s-7-.24-7-3c0-2.76 3.63-5 7-5Z"/>
+        </svg>
+      </div>
+      <h1>Gat i Gos</h1>
+    </div>
+    <div class="controls">
+      <label class="switch" title="Modo reducido de movimiento">
+        <span class="hint">Animaciones</span>
+        <input id="animToggle" type="checkbox" checked aria-label="Activar o desactivar animaciones"/>
+      </label>
+      <button class="btn accent" onclick="document.getElementById('reserva').scrollIntoView({behavior:'smooth'})">Reservar ahora</button>
+    </div>
   </header>
 
-  <section class="hero">
-    <h2>Reserva baño o corte para tu mascota en 1 clic</h2>
-    <button onclick="document.getElementById('reserva').scrollIntoView({behavior:'smooth'})">
-      Reservar ahora
-    </button>
-  </section>
+  <main>
+    <!-- HERO 3D CARD -->
+    <section class="hero" aria-label="Presentación">
+      <div class="hero-card">
+        <div class="card-3d" id="tilt">
+          <div class="shine"></div>
+          <h2>Reserva baño o corte <br> para tu mascota en 1 clic</h2>
+          <p>Calidad veterinaria, estilismo de concurso y mimos ilimitados. Agenda online, recordatorios y precios claros.</p>
+          <div class="cta">
+            <button class="btn accent" onclick="document.getElementById('reserva').scrollIntoView({behavior:'smooth'})">Quiero una cita</button>
+            <button class="btn" onclick="document.getElementById('servicios').scrollIntoView({behavior:'smooth'})">Ver servicios</button>
+          </div>
+          <!-- Mascotas ilustración -->
+          <svg class="pets" viewBox="0 0 310 220" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#7cf3c0"/>
+                <stop offset="100%" stop-color="#7bb9ff"/>
+              </linearGradient>
+            </defs>
+            <g>
+              <circle cx="70" cy="150" r="55" fill="url(#g1)" opacity=".25"/>
+              <circle cx="220" cy="140" r="70" fill="url(#g1)" opacity=".2"/>
+              <!-- Perro -->
+              <g transform="translate(40,40)">
+                <rect x="0" y="60" width="120" height="80" rx="30" fill="#fff"/>
+                <circle cx="30" cy="60" r="26" fill="#fff"/>
+                <circle cx="90" cy="60" r="26" fill="#fff"/>
+                <circle cx="45" cy="85" r="6"/><circle cx="75" cy="85" r="6"/>
+                <rect x="52" y="98" width="16" height="8" rx="4"/>
+                <path d="M16 52 q-10 -20 10 -28" stroke="#fff" stroke-width="10" fill="none" stroke-linecap="round"/>
+              </g>
+              <!-- Gato -->
+              <g transform="translate(180,60)">
+                <rect x="0" y="50" width="90" height="70" rx="24" fill="#fff"/>
+                <polygon points="10,50 22,20 34,50" fill="#fff"/>
+                <polygon points="56,50 68,20 80,50" fill="#fff"/>
+                <circle cx="30" cy="80" r="5"/><circle cx="58" cy="80" r="5"/>
+                <path d="M38 92 q7 10 14 0" stroke="#000" stroke-width="4" fill="none" stroke-linecap="round"/>
+              </g>
+            </g>
+          </svg>
+        </div>
+      </div>
+      <div>
+        <p class="section-title">Ventajas</p>
+        <div class="grid">
+          <div class="service">
+            <span class="badge">+Seguro</span>
+            <h3>Supervisión veterinaria</h3>
+            <small>Check-in de piel, orejas y uñas en cada sesión.</small>
+          </div>
+          <div class="service">
+            <span class="badge">+Cómodo</span>
+            <h3>Reserva 24/7</h3>
+            <small>Confirmación instantánea y recordatorio por WhatsApp.</small>
+          </div>
+          <div class="service">
+            <span class="badge">+Limpio</span>
+            <h3>Cabinas higienizadas</h3>
+            <small>Protocolos de desinfección entre mascotas.</small>
+          </div>
+        </div>
+      </div>
+    </section>
 
-  <section class="servicios">
-    <h3>Servicios</h3>
-    <ul>
-      <li>Baño y secado</li>
-      <li>Corte de pelo</li>
-      <li>Corte de uñas</li>
-      <li>Comida y accesorios</li>
-    </ul>
-  </section>
+    <!-- SERVICES -->
+    <section id="servicios" aria-label="Servicios">
+      <p class="section-title">Servicios destacados</p>
+      <div class="grid">
+        <article class="service" data-servicio="Baño y secado" data-precio="22">
+          <span class="badge">Desde 22€</span>
+          <h3>Baño y secado</h3>
+          <small>Aromas neutros, champú hipoalergénico.</small>
+          <img class="illus" alt="Ilustración baño" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><g fill='none' stroke='%23fff' stroke-width='4'><circle cx='80' cy='80' r='30'/><path d='M40 110h80'/></g></svg>">
+          <div class="actions">
+            <button class="btn accent select-service">Reservar</button>
+            <button class="btn">Detalles</button>
+          </div>
+        </article>
+        <article class="service" data-servicio="Corte de pelo" data-precio="28">
+          <span class="badge">Desde 28€</span>
+          <h3>Corte de pelo</h3>
+          <small>Estilo según raza o personalizado.</small>
+          <img class="illus" alt="Ilustración tijeras" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><g fill='none' stroke='%23fff' stroke-width='4'><path d='M30 120 130 40M30 40l100 80'/><circle cx='30' cy='120' r='10'/><circle cx='30' cy='40' r='10'/></g></svg>">
+          <div class="actions">
+            <button class="btn accent select-service">Reservar</button>
+            <button class="btn">Detalles</button>
+          </div>
+        </article>
+        <article class="service" data-servicio="Corte de uñas" data-precio="12">
+          <span class="badge">Desde 12€</span>
+          <h3>Corte de uñas</h3>
+          <small>Indoloro y rápido, con limado suave.</small>
+          <img class="illus" alt="Ilustración uñas" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><g fill='none' stroke='%23fff' stroke-width='4'><path d='M40 120 q40-80 80 0'/></g></svg>">
+          <div class="actions">
+            <button class="btn accent select-service">Reservar</button>
+            <button class="btn">Detalles</button>
+          </div>
+        </article>
+      </div>
+    </section>
 
-  <section class="formulario" id="reserva">
-    <h3>Reserva tu cita</h3>
-    <form id="reservaForm">
-      <input type="text" name="nombre" placeholder="Tu nombre" required />
-      <input type="text" name="telefono" placeholder="Teléfono" required />
-      <input type="text" name="nombreMascota" placeholder="Nombre de la mascota" required />
-      <select name="servicio" required>
-        <option value="">Selecciona servicio</option>
-        <option value="baño">Baño</option>
-        <option value="corte">Corte</option>
-        <option value="uñas">Corte de uñas</option>
-      </select>
-      <input type="datetime-local" name="fecha" required />
-      <button type="submit">Enviar reserva</button>
-    </form>
-    <p id="respuesta"></p>
-  </section>
+    <!-- FORM -->
+    <section id="reserva" aria-label="Formulario de reserva">
+      <p class="section-title">Reserva tu cita</p>
+      <div class="form-wrap">
+        <form id="reservaForm" novalidate>
+          <div class="row">
+            <div>
+              <label for="nombre">Tu nombre</label>
+              <input id="nombre" name="nombre" autocomplete="name" placeholder="Ej. Samuel Pérez" required>
+            </div>
+            <div>
+              <label for="telefono">Teléfono</label>
+              <input id="telefono" name="telefono" inputmode="tel" placeholder="Ej. 611 234 567" pattern="^[0-9\\s+()-]{9,}$" required>
+              <div class="hint">Usaremos WhatsApp para recordarte la cita</div>
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label for="mascota">Nombre de la mascota</label>
+              <input id="mascota" name="nombreMascota" placeholder="Toby" required>
+            </div>
+            <div>
+              <label for="tipo">Tipo</label>
+              <select id="tipo" name="tipo" required>
+                <option value="">Selecciona…</option>
+                <option>Perro</option>
+                <option>Gato</option>
+                <option>Otro</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label for="servicio">Servicio</label>
+              <select id="servicio" name="servicio" required>
+                <option value="">Selecciona servicio…</option>
+                <option value="Baño y secado" data-precio="22">Baño y secado</option>
+                <option value="Corte de pelo" data-precio="28">Corte de pelo</option>
+                <option value="Corte de uñas" data-precio="12">Corte de uñas</option>
+              </select>
+            </div>
+            <div>
+              <label for="fecha">Fecha y hora</label>
+              <input id="fecha" name="fecha" type="datetime-local" required>
+              <div class="hint">Horario: 09:00–20:00 (Cerrado domingos)</div>
+            </div>
+          </div>
+          <div class="row-3 row">
+            <label><input type="checkbox" name="extras" value="Deslanado" data-precio="8"> Deslanado +8€</label>
+            <label><input type="checkbox" name="extras" value="Limpieza dental" data-precio="10"> Limpieza dental +10€</label>
+            <label><input type="checkbox" name="extras" value="Glándulas" data-precio="6"> Glándulas +6€</label>
+          </div>
+          <div style="margin-top:10px">
+            <label for="notas">Notas para el estilista</label>
+            <textarea id="notas" name="notas" placeholder="Alérgico a… / Estilo preferido…"></textarea>
+          </div>
 
-  <script src="script.js"></script>
+          <div class="total" aria-live="polite">
+            <span>Total estimado</span>
+            <b id="total">0€</b>
+          </div>
+
+          <div class="kudos">
+            <label class="switch"><span class="hint">Recordarme por WhatsApp</span><input id="whats" type="checkbox" checked></label>
+            <label class="switch"><span class="hint">Guardar mis datos</span><input id="saveDraft" type="checkbox" checked></label>
+          </div>
+
+          <div style="display:flex; gap:10px; margin-top:14px">
+            <button type="submit" class="btn accent" style="--pad:14px 18px">Enviar reserva</button>
+            <button type="reset" class="btn">Limpiar</button>
+          </div>
+          <div class="hint" id="respuesta" role="status" aria-live="polite" style="margin-top:8px"></div>
+        </form>
+
+        <!-- SUMMARY -->
+        <aside class="summary" aria-label="Resumen">
+          <h4>Resumen</h4>
+          <div class="line"><span>Cliente</span><span id="sCliente">—</span></div>
+          <div class="line"><span>Mascota</span><span id="sMascota">—</span></div>
+          <div class="line"><span>Servicio</span><span id="sServicio">—</span></div>
+          <div class="line"><span>Fecha</span><span id="sFecha">—</span></div>
+          <div class="line"><span>Extras</span><span id="sExtras">—</span></div>
+          <div class="line"><span>Total</span><span id="sTotal">0€</span></div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <canvas class="confetti" id="confetti"></canvas>
+
+  <footer>
+    <span>© <span id="year"></span> Gat i Gos · Cuidamos a quien más quieres</span>
+    <a class="hint" href="#reserva">Ir al formulario ↑</a>
+  </footer>
+
+  <script>
+  // ====== UTILIDADES ======
+  const $ = s => document.querySelector(s);
+  const $$ = s => [...document.querySelectorAll(s)];
+  const currency = n => new Intl.NumberFormat('es-ES', {style:'currency', currency:'EUR', maximumFractionDigits:0}).format(n);
+
+  // ====== BACKGROUND PAW PARTICLES ======
+  (function pawParticles(){
+    const cvs = document.querySelector('canvas.paws');
+    const ctx = cvs.getContext('2d');
+    let w, h, paws = [];
+    const paw = (x,y,s,dx,dy) => ({x,y,s,dx,dy,a:Math.random()*Math.PI});
+    function resize(){ w = cvs.width = innerWidth; h = cvs.height = innerHeight; paws = Array.from({length: 40}, ()=> paw(Math.random()*w, Math.random()*h, 10+Math.random()*16, (Math.random()-.5)*.4, (Math.random()-.5)*.4)); }
+    function drawPaw(p){
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.sin(p.a)*.4); ctx.scale(p.s/24, p.s/24);
+      ctx.globalAlpha = .12;
+      ctx.beginPath(); // almohadilla
+      ctx.ellipse(0, 6, 10, 13, 0, 0, Math.PI*2);
+      for(let i=0;i<4;i++){ ctx.ellipse([-9,-3,3,9][i], -8, 5.5, 7, 0, 0, Math.PI*2); }
+      ctx.fillStyle = '#fff'; ctx.fill();
+      ctx.restore();
+    }
+    function tick(){ ctx.clearRect(0,0,w,h); paws.forEach(p=>{ p.x+=p.dx; p.y+=p.dy; p.a+=.01; if(p.x< -20) p.x=w+20; if(p.x>w+20) p.x=-20; if(p.y< -20) p.y=h+20; if(p.y>h+20) p.y=-20; drawPaw(p); }); requestAnimationFrame(tick); }
+    addEventListener('resize', resize); resize(); tick();
+  })();
+
+  // ====== 3D TILT ======
+  (function tiltCard(){
+    const card = document.getElementById('tilt');
+    const shine = card.querySelector('.shine');
+    card.addEventListener('pointermove', e => {
+      const r = card.getBoundingClientRect();
+      const x = e.clientX - r.left, y = e.clientY - r.top;
+      const rx = ((y/r.height) - .5) * -10; // rotX
+      const ry = ((x/r.width) - .5) * 10;  // rotY
+      card.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+      shine.style.setProperty('--mx', (x/r.width*100)+'%');
+      shine.style.setProperty('--my', (y/r.height*100)+'%');
+    });
+    card.addEventListener('pointerleave', () => card.style.transform = 'rotateX(0) rotateY(0)');
+  })();
+
+  // ====== SERVICIOS -> PRESELECCIÓN ======
+  $$('.select-service').forEach(btn => btn.addEventListener('click', e => {
+    const card = e.target.closest('.service');
+    const nombre = card.dataset.servicio; const precio = Number(card.dataset.precio);
+    const sel = document.getElementById('servicio');
+    [...sel.options].forEach(o => { if(o.value === nombre){ sel.value = nombre; sel.dispatchEvent(new Event('change')); }});
+    document.getElementById('reserva').scrollIntoView({behavior:'smooth'});
+  }));
+
+  // ====== FORM LOGIC ======
+  const form = document.getElementById('reservaForm');
+  const totalEl = document.getElementById('total');
+  const resumen = {
+    cliente: document.getElementById('sCliente'),
+    mascota: document.getElementById('sMascota'),
+    servicio: document.getElementById('sServicio'),
+    fecha: document.getElementById('sFecha'),
+    extras: document.getElementById('sExtras'),
+    total: document.getElementById('sTotal')
+  };
+
+  // Fecha: reglas negocio (L-V 09:00-20:00, sáb 10:00-14:00, sin domingos)
+  (function setupFecha(){
+    const input = document.getElementById('fecha');
+    const now = new Date(); now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    input.min = now.toISOString().slice(0,16);
+    input.step = 60 * 15; // 15 minutos
+  })();
+
+  function horarioValido(dt){
+    const d = new Date(dt);
+    const day = d.getDay(); // 0 dom ... 6 sab
+    const h = d.getHours();
+    if(day === 0) return false; // domingo cerrado
+    if(day === 6) return h >= 10 && h < 14; // sábado
+    return h >= 9 && h < 20; // L-V
+  }
+
+  function calcTotal(){
+    const sel = document.getElementById('servicio');
+    const base = Number(sel.selectedOptions[0]?.dataset.precio || 0);
+    let extra = 0; $$("input[name='extras']:checked").forEach(x => extra += Number(x.dataset.precio));
+    const total = base + extra; totalEl.textContent = currency(total); resumen.total.textContent = totalEl.textContent; return total;
+  }
+
+  function syncResumen(){
+    resumen.cliente.textContent = document.getElementById('nombre').value || '—';
+    resumen.mascota.textContent = document.getElementById('mascota').value || '—';
+    resumen.servicio.textContent = document.getElementById('servicio').value || '—';
+    const f = document.getElementById('fecha').value; resumen.fecha.textContent = f ? new Date(f).toLocaleString('es-ES',{dateStyle:'medium', timeStyle:'short'}) : '—';
+    const ex = $$("input[name='extras']:checked").map(e => e.value).join(', ');
+    resumen.extras.textContent = ex || '—';
+  }
+
+  $$('#servicio, input[name="extras"]').forEach(el => el.addEventListener('change', ()=>{ calcTotal(); syncResumen(); }));
+  ;['nombre','mascota','fecha'].forEach(id => document.getElementById(id).addEventListener('input', syncResumen));
+  document.getElementById('telefono').addEventListener('input', (e)=>{ e.target.value = e.target.value.replace(/[^\d+\s()-]/g,''); });
+
+  // Persistencia simple
+  const draftKey = 'gatigos-reserva-v1';
+  function saveDraft(){ if(!$('#saveDraft').checked) return; localStorage.setItem(draftKey, JSON.stringify(Object.fromEntries(new FormData(form)))); }
+  function loadDraft(){ const raw = localStorage.getItem(draftKey); if(!raw) return; const data = JSON.parse(raw); Object.entries(data).forEach(([k,v])=>{ const el = form.elements[k]; if(!el) return; if(el.type==='checkbox'){ $$(`input[name='${k}']`).forEach(ch=> ch.checked = (Array.isArray(v)? v.includes(ch.value) : v===ch.value)); } else { el.value = v; } }); calcTotal(); syncResumen(); }
+  form.addEventListener('input', saveDraft); loadDraft();
+
+  // Cambio servicio -> recalcular
+  document.getElementById('servicio').addEventListener('change', calcTotal);
+
+  // Toast helper
+  function toast(msg, ok=true){ const t=$('#toast'); t.textContent = msg; t.className='toast ' + (ok?'ok':'err'); t.style.display='block'; clearTimeout(t._h); t._h=setTimeout(()=> t.style.display='none', 3000); }
+
+  // Confetti simple
+  function fireConfetti(){ const c = $('#confetti'), ctx = c.getContext('2d'); let W=c.width=innerWidth, H=c.height=innerHeight; const pieces=Array.from({length:140}, ()=>({x:Math.random()*W,y:-20-Math.random()*H, s:5+Math.random()*8, v:1+Math.random()*3, a:Math.random()*6.28})); let t=0; function draw(){ ctx.clearRect(0,0,W,H); pieces.forEach(p=>{ p.y+=p.v; p.x+=Math.sin((t+p.a))*1.5; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.a+t/10); ctx.fillStyle = ['#7cf3c0','#7bb9ff','#ff7b95','#fff'][Math.floor(Math.random()*4)]; ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s); ctx.restore(); if(p.y>H+20) p.y=-20;}); t++; if(t<240) requestAnimationFrame(draw); else ctx.clearRect(0,0,W,H); } draw(); }
+
+  // Validación + Submit simulado
+  form.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const fd = new FormData(form);
+    const f = fd.get('fecha');
+    if(!horarioValido(f)){
+      toast('La hora seleccionada no está dentro del horario. L-V 09:00–20:00 · Sáb 10:00–14:00 · Cerrado domingos', false); return;
+    }
+    if(!form.checkValidity()){ form.reportValidity(); return; }
+
+    // Simulación de disponibilidad (mock): bloquea 12:00 y 17:30
+    const d = new Date(f); const hh = d.getHours(), mm = d.getMinutes();
+    if((hh===12 && mm===0) || (hh===17 && mm===30)){
+      toast('Lo sentimos, ese hueco se acaba de ocupar. Prueba otra hora.', false); return;
+    }
+
+    // OK: "envío" ficticio
+    const nombre = fd.get('nombre');
+    const mascota = fd.get('nombreMascota');
+    const servicio = fd.get('servicio');
+    toast('¡Reserva enviada! Te contactaremos en breve.');
+    fireConfetti();
+    $('#respuesta').textContent = `Gracias, ${nombre}. Hemos recibido tu reserva para ${mascota} (${servicio}).`;
+    // Limpieza parcial manteniendo datos básicos si el usuario quiere
+    if(!$('#saveDraft').checked) localStorage.removeItem(draftKey);
+  });
+
+  // Animaciones ON/OFF
+  const animToggle = $('#animToggle');
+  animToggle.addEventListener('change', ()=>{
+    document.querySelector('canvas.paws').style.display = animToggle.checked ? 'block' : 'none';
+    document.querySelector('.pets').style.filter = animToggle.checked ? 'drop-shadow(0 30px 35px rgba(0,0,0,.5))' : 'none';
+  });
+
+  // Año footer + total inicial
+  document.getElementById('year').textContent = new Date().getFullYear();
+  calcTotal();
+  syncResumen();
+  </script>
 </body>
 </html>
-=======
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tienda de Mascotas - Reserva</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <header>
-    <h1>🐾 Gat i Gos</h1>
-    <p>Tu tienda de confianza para el cuidado de tu mascota</p>
-  </header>
-
-  <section class="hero">
-    <h2>Reserva baño o corte para tu mascota en 1 clic</h2>
-    <button onclick="document.getElementById('reserva').scrollIntoView({behavior:'smooth'})">
-      Reservar ahora
-    </button>
-  </section>
-
-  <section class="servicios">
-    <h3>Servicios</h3>
-    <ul>
-      <li>Baño y secado</li>
-      <li>Corte de pelo</li>
-      <li>Corte de uñas</li>
-      <li>Comida y accesorios</li>
-    </ul>
-  </section>
-
-  <section class="formulario" id="reserva">
-    <h3>Reserva tu cita</h3>
-    <form id="reservaForm">
-      <input type="text" name="nombre" placeholder="Tu nombre" required />
-      <input type="text" name="telefono" placeholder="Teléfono" required />
-      <input type="text" name="nombreMascota" placeholder="Nombre de la mascota" required />
-      <select name="servicio" required>
-        <option value="">Selecciona servicio</option>
-        <option value="baño">Baño</option>
-        <option value="corte">Corte</option>
-        <option value="uñas">Corte de uñas</option>
-      </select>
-      <input type="datetime-local" name="fecha" required />
-      <button type="submit">Enviar reserva</button>
-    </form>
-    <p id="respuesta"></p>
-  </section>
-
-  <script src="script.js"></script>
-</body>
-</html>
->>>>>>> 11f3fcf3207355f38b08f8b5bb49d9d169fc7417
