@@ -502,13 +502,44 @@
       toast('Lo sentimos, ese hueco se acaba de ocupar. Prueba otra hora.', false); return;
     }
 
-    // OK: "envío" ficticio
-    const nombre = fd.get('nombre');
-    const mascota = fd.get('nombreMascota');
-    const servicio = fd.get('servicio');
-    toast('¡Reserva enviada! Te contactaremos en breve.');
-    fireConfetti();
-    $('#respuesta').textContent = `Gracias, ${nombre}. Hemos recibido tu reserva para ${mascota} (${servicio}).`;
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const fd = new FormData(form);
+  const f = fd.get('fecha');
+
+  if(!horarioValido(f)){
+    toast('La hora seleccionada no está dentro del horario. L-V 09:00–20:00 · Sáb 10:00–14:00 · Cerrado domingos', false);
+    return;
+  }
+  if(!form.checkValidity()){ form.reportValidity(); return; }
+
+    // Datos que vamos a enviar
+    const data = Object.fromEntries(fd.entries());
+    data.extras = $$("input[name='extras']:checked").map(e => e.value);
+
+    try {
+      const response = await fetch("https://gatigos-frontend.vercel.app/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      });
+
+      if(response.ok){
+        toast("¡Reserva enviada! Te contactaremos en breve.");
+        fireConfetti();
+        $('#respuesta').textContent = `Gracias, ${data.nombre}. Hemos recibido tu reserva para ${data.nombreMascota} (${data.servicio}).`;
+        if(!$('#saveDraft').checked) localStorage.removeItem(draftKey);
+      } else {
+        toast("Error al enviar la reserva. Inténtalo más tarde.", false);
+      }
+    } catch (err) {
+      console.error(err);
+      toast("Error de conexión con el servidor.", false);
+    }
+  });
+
     // Limpieza parcial manteniendo datos básicos si el usuario quiere
     if(!$('#saveDraft').checked) localStorage.removeItem(draftKey);
   });
