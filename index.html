@@ -518,7 +518,7 @@ form.addEventListener('submit', async (e) => {
     data.extras = $$("input[name='extras']:checked").map(e => e.value);
 
     try {
-      const response = await fetch("https://gatigos-frontend.vercel.app/", {
+      const response = await fetch("https://gatigos-backend.onrender.com", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
