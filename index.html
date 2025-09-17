@@ -9,23 +9,34 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;800&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --bg: #0c0f14;
-      --surface: rgba(255,255,255,.08);
-      --card: rgba(255,255,255,.12);
-      --text: #eaf2ff;
-      --muted: #b7c4dd;
-      --accent: #7cf3c0;
-      --accent-2: #7bb9ff;
-      --danger: #ff7b95;
-      --ok: #9dff7c;
-      --ring: rgba(124, 243, 192, .45);
-      --shadow: 0 10px 30px rgba(0,0,0,.45);
-      --radius: 18px;
-    }
-    @media (prefers-color-scheme: light){
-      :root{ --bg:#f6f8ff; --surface:rgba(0,12,40,.04); --card:#ffffffd9; --text:#0d1b2a; --muted:#3d5a80; --accent:#0cc5a7; --accent-2:#3a86ff; --ring:rgba(58,134,255,.25); --shadow: 0 10px 30px rgba(31,38,135,.2);}  
-    }
+:root{
+  --bg: #f8f9fa;
+  --surface: rgba(255, 255, 255, 0.95);
+  --card: #ffffff;
+  --text: #2c3e50;
+  --muted: #7f8c8d;
+  --accent: #ff6b6b;
+  --accent-2: #48dbfb;
+  --danger: #e74c3c;
+  --ok: #1dd1a1;
+  --ring: rgba(255, 107, 107, 0.25);
+  --shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  --radius: 14px;
+}
+
+@media (prefers-color-scheme: dark){
+  :root{ 
+    --bg: #1a1a1a;
+    --surface: rgba(40, 40, 40, 0.95);
+    --card: #2d2d2d;
+    --text: #f1f2f6;
+    --muted: #a0a0a0;
+    --accent: #ff6b6b;
+    --accent-2: #48dbfb;
+    --ring: rgba(72, 219, 251, 0.25);
+    --shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  }  
+}
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
@@ -33,13 +44,20 @@
       color:var(--text); background:var(--bg); overflow-x:hidden;
     }
     /* ====== Background FX ====== */
-    .bg{
-      position:fixed; inset:0; z-index:-2; background: radial-gradient(1200px 800px at 20% 10%, rgba(124,243,192,.12), transparent 60%),
-                  radial-gradient(1000px 800px at 80% 0%, rgba(123,185,255,.10), transparent 60%),
-                  radial-gradient(1200px 900px at 50% 100%, rgba(255,123,149,.08), transparent 60%),
-                  linear-gradient(180deg, rgba(0,0,0,.3), transparent 25%);
-      filter:saturate(1.05);
-    }
+.bg{
+  position: fixed; 
+  inset: 0; 
+  z-index: -2;
+  background: 
+    linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+@media (prefers-color-scheme: dark) {
+  .bg{
+    background: 
+      linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  }
+}
     canvas.paws{position:fixed; inset:0; z-index:-1; opacity:.35;}
 
     header{
@@ -163,13 +181,9 @@
       </div>
       <h1>Gat i Gos</h1>
     </div>
-    <div class="controls">
-      <label class="switch" title="Modo reducido de movimiento">
-        <span class="hint">Animaciones</span>
-        <input id="animToggle" type="checkbox" checked aria-label="Activar o desactivar animaciones"/>
-      </label>
-      <button class="btn accent" onclick="document.getElementById('reserva').scrollIntoView({behavior:'smooth'})">Reservar ahora</button>
-    </div>
+<button class="btn accent" onclick="document.getElementById('reserva').scrollIntoView({behavior:'smooth'})">
+  <i class="fas fa-paw" style="margin-right: 8px;"></i>Reservar ahora
+</button>
   </header>
 
   <main>
@@ -377,25 +391,79 @@
   const $$ = s => [...document.querySelectorAll(s)];
   const currency = n => new Intl.NumberFormat('es-ES', {style:'currency', currency:'EUR', maximumFractionDigits:0}).format(n);
 
-  // ====== BACKGROUND PAW PARTICLES ======
-  (function pawParticles(){
-    const cvs = document.querySelector('canvas.paws');
-    const ctx = cvs.getContext('2d');
-    let w, h, paws = [];
-    const paw = (x,y,s,dx,dy) => ({x,y,s,dx,dy,a:Math.random()*Math.PI});
-    function resize(){ w = cvs.width = innerWidth; h = cvs.height = innerHeight; paws = Array.from({length: 40}, ()=> paw(Math.random()*w, Math.random()*h, 10+Math.random()*16, (Math.random()-.5)*.4, (Math.random()-.5)*.4)); }
-    function drawPaw(p){
-      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.sin(p.a)*.4); ctx.scale(p.s/24, p.s/24);
-      ctx.globalAlpha = .12;
-      ctx.beginPath(); // almohadilla
-      ctx.ellipse(0, 6, 10, 13, 0, 0, Math.PI*2);
-      for(let i=0;i<4;i++){ ctx.ellipse([-9,-3,3,9][i], -8, 5.5, 7, 0, 0, Math.PI*2); }
-      ctx.fillStyle = '#fff'; ctx.fill();
-      ctx.restore();
+// ====== ANIMACIÓN DE HUELLAS DE MASCOTAS ======
+(function pawPrintsAnimation(){
+  const cvs = document.querySelector('canvas.paws');
+  const ctx = cvs.getContext('2d');
+  let w, h;
+  const pawPrints = [];
+  
+  // Forma de huella de patita
+  function drawPawPrint(x, y, size, opacity) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(size/30, size/30);
+    ctx.globalAlpha = opacity;
+    
+    // Color según modo claro/oscuro
+    ctx.fillStyle = window.matchMedia('(prefers-color-scheme: dark)').matches ? 
+                    'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.08)';
+    
+    // Dibujar huella (círculo central + 4 almohadillas)
+    ctx.beginPath();
+    // Círculo central
+    ctx.arc(0, 0, 8, 0, Math.PI * 2);
+    // Almohadillas
+    ctx.arc(-10, -8, 5, 0, Math.PI * 2);
+    ctx.arc(10, -8, 5, 0, Math.PI * 2);
+    ctx.arc(-8, 8, 5, 0, Math.PI * 2);
+    ctx.arc(8, 8, 5, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.restore();
+  }
+  
+  function resize() { 
+    w = cvs.width = innerWidth; 
+    h = cvs.height = innerHeight; 
+    
+    // Reiniciar huellas con nuevas posiciones
+    pawPrints.length = 0;
+    for (let i = 0; i < 15; i++) {
+      pawPrints.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        size: 15 + Math.random() * 20,
+        speed: 0.2 + Math.random() * 0.5,
+        opacity: 0.1 + Math.random() * 0.2
+      });
     }
-    function tick(){ ctx.clearRect(0,0,w,h); paws.forEach(p=>{ p.x+=p.dx; p.y+=p.dy; p.a+=.01; if(p.x< -20) p.x=w+20; if(p.x>w+20) p.x=-20; if(p.y< -20) p.y=h+20; if(p.y>h+20) p.y=-20; drawPaw(p); }); requestAnimationFrame(tick); }
-    addEventListener('resize', resize); resize(); tick();
-  })();
+  }
+  
+  function animate() {
+    ctx.clearRect(0, 0, w, h);
+    
+    pawPrints.forEach(paw => {
+      // Mover la huella
+      paw.y += paw.speed;
+      
+      // Si se sale de la pantalla, reiniciar arriba
+      if (paw.y > h + 30) {
+        paw.y = -30;
+        paw.x = Math.random() * w;
+      }
+      
+      // Dibujar huella
+      drawPawPrint(paw.x, paw.y, paw.size, paw.opacity);
+    });
+    
+    requestAnimationFrame(animate);
+  }
+  
+  addEventListener('resize', resize);
+  resize();
+  animate();
+})();
 
   // ====== 3D TILT ======
   (function tiltCard(){
@@ -483,24 +551,111 @@
   // Toast helper
   function toast(msg, ok=true){ const t=$('#toast'); t.textContent = msg; t.className='toast ' + (ok?'ok':'err'); t.style.display='block'; clearTimeout(t._h); t._h=setTimeout(()=> t.style.display='none', 3000); }
 
-  // Confetti simple
-  function fireConfetti(){ const c = $('#confetti'), ctx = c.getContext('2d'); let W=c.width=innerWidth, H=c.height=innerHeight; const pieces=Array.from({length:140}, ()=>({x:Math.random()*W,y:-20-Math.random()*H, s:5+Math.random()*8, v:1+Math.random()*3, a:Math.random()*6.28})); let t=0; function draw(){ ctx.clearRect(0,0,W,H); pieces.forEach(p=>{ p.y+=p.v; p.x+=Math.sin((t+p.a))*1.5; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.a+t/10); ctx.fillStyle = ['#7cf3c0','#7bb9ff','#ff7b95','#fff'][Math.floor(Math.random()*4)]; ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s); ctx.restore(); if(p.y>H+20) p.y=-20;}); t++; if(t<240) requestAnimationFrame(draw); else ctx.clearRect(0,0,W,H); } draw(); }
-
-  // Validación + Submit simulado
-  form.addEventListener('submit', async (e)=>{
-    e.preventDefault();
-    const fd = new FormData(form);
-    const f = fd.get('fecha');
-    if(!horarioValido(f)){
-      toast('La hora seleccionada no está dentro del horario. L-V 09:00–20:00 · Sáb 10:00–14:00 · Cerrado domingos', false); return;
+  // Confetti con temática de mascotas
+function fireConfetti(){
+  const c = $('#confetti'), ctx = c.getContext('2d');
+  let W = c.width = innerWidth, H = c.height = innerHeight;
+  
+  // Símbolos de mascotas: huesos, pelotas, platos de comida
+  const petSymbols = [
+    { type: 'bone', color: '#ffffff' },
+    { type: 'ball', color: '#ff6b6b' },
+    { type: 'ball', color: '#48dbfb' },
+    { type: 'paw', color: '#1dd1a1' },
+    { type: 'bowl', color: '#feca57' }
+  ];
+  
+  const pieces = Array.from({length: 80}, () => ({
+    x: Math.random() * W,
+    y: -20 - Math.random() * H,
+    size: 8 + Math.random() * 12,
+    speed: 1 + Math.random() * 3,
+    angle: Math.random() * 6.28,
+    rotation: Math.random() * 0.1 - 0.05,
+    symbol: petSymbols[Math.floor(Math.random() * petSymbols.length)]
+  }));
+  
+  function drawPetSymbol(x, y, size, symbol, color) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.fillStyle = color;
+    
+    switch(symbol) {
+      case 'bone':
+        // Dibujar hueso
+        ctx.fillRect(-size/2, -size/6, size, size/3);
+        ctx.beginPath();
+        ctx.arc(-size/2, 0, size/3, 0, Math.PI * 2);
+        ctx.arc(size/2, 0, size/3, 0, Math.PI * 2);
+        ctx.fill();
+        break;
+        
+      case 'ball':
+        // Dibujar pelota
+        ctx.beginPath();
+        ctx.arc(0, 0, size/2, 0, Math.PI * 2);
+        ctx.fill();
+        // Línea decorativa
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(0, 0, size/3, 0, Math.PI);
+        ctx.stroke();
+        break;
+        
+      case 'paw':
+        // Dibujar huella
+        ctx.beginPath();
+        ctx.arc(0, 0, size/3, 0, Math.PI * 2);
+        ctx.fill();
+        for (let i = 0; i < 4; i++) {
+          const angle = (i * Math.PI/2);
+          ctx.beginPath();
+          ctx.arc(Math.cos(angle)*size/2, Math.sin(angle)*size/2, size/4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        break;
+        
+      case 'bowl':
+        // Dibujar plato
+        ctx.beginPath();
+        ctx.ellipse(0, size/6, size/2, size/4, 0, 0, Math.PI);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(0, size/6, size/2.5, size/6, 0, 0, Math.PI);
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        break;
     }
-    if(!form.checkValidity()){ form.reportValidity(); return; }
-
-    // Simulación de disponibilidad (mock): bloquea 12:00 y 17:30
-    const d = new Date(f); const hh = d.getHours(), mm = d.getMinutes();
-    if((hh===12 && mm===0) || (hh===17 && mm===30)){
-      toast('Lo sentimos, ese hueco se acaba de ocupar. Prueba otra hora.', false); return;
+    
+    ctx.restore();
+  }
+  
+  let t = 0;
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    
+    pieces.forEach(p => {
+      p.y += p.speed;
+      p.x += Math.sin(t/10 + p.angle) * 1.2;
+      p.angle += p.rotation;
+      
+      drawPetSymbol(p.x, p.y, p.size, p.symbol.type, p.symbol.color);
+      
+      if (p.y > H + 20) p.y = -20;
+    });
+    
+    t++;
+    if (t < 180) {
+      requestAnimationFrame(draw);
+    } else {
+      ctx.clearRect(0, 0, W, H);
     }
+  }
+  
+  draw();
+}
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -516,7 +671,7 @@ form.addEventListener('submit', async (e) => {
     return;
   }
 
-  // Simulación de disponibilidad (mock): bloquea 12:00 y 17:30
+  // Simulación de disponibilidad (mock)
   const d = new Date(f);
   const hh = d.getHours(), mm = d.getMinutes();
   if ((hh === 12 && mm === 0) || (hh === 17 && mm === 30)) {
@@ -524,7 +679,7 @@ form.addEventListener('submit', async (e) => {
     return;
   }
 
-  // Datos que vamos a enviar
+  // Datos a enviar
   const data = Object.fromEntries(fd.entries());
   data.extras = $$("input[name='extras']:checked").map(e => e.value);
 
@@ -549,17 +704,6 @@ form.addEventListener('submit', async (e) => {
   }
 });
 
-
-    // Limpieza parcial manteniendo datos básicos si el usuario quiere
-    if(!$('#saveDraft').checked) localStorage.removeItem(draftKey);
-  });
-
-  // Animaciones ON/OFF
-  const animToggle = $('#animToggle');
-  animToggle.addEventListener('change', ()=>{
-    document.querySelector('canvas.paws').style.display = animToggle.checked ? 'block' : 'none';
-    document.querySelector('.pets').style.filter = animToggle.checked ? 'drop-shadow(0 30px 35px rgba(0,0,0,.5))' : 'none';
-  });
 
   // Año footer + total inicial
   document.getElementById('year').textContent = new Date().getFullYear();
